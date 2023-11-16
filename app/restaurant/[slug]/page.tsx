@@ -6,13 +6,15 @@ import Images from "./components/Images";
 import Reviews from "./components/Reviews";
 import ReservationCard from "./components/ReservationCard";
 import { Metadata } from "next";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Review } from "@prisma/client";
+import { notFound } from "next/navigation";
  export interface restaurantSlug {
   id: number;
   name: string;
   description: string;
   images: string[];
   slug: string;
+  reviews:Review[]
 }
 const prisma = new PrismaClient();
 const fetchRestaurantSlug = async (slug: string): Promise<restaurantSlug> => {
@@ -26,9 +28,12 @@ const fetchRestaurantSlug = async (slug: string): Promise<restaurantSlug> => {
       description: true,
       images: true,
       slug: true,
+      reviews:true
     },
   });
-  if (!restaurantSlug) throw new Error();
+  if (!restaurantSlug) {
+    notFound()
+  }
   return restaurantSlug;
 };
 export const metadata: Metadata = {
@@ -44,10 +49,10 @@ const RestaurantDetails = async ({ params }: { params: { slug: string } }) => {
       <div className="bg-white w-[70%] rounded p-3 shadow">
         <RestaurantNavBar slug={restaurantSlug.slug} />
         <Title restaurantSlug={restaurantSlug} />
-        <Rating  />
+        <Rating restaurantSlug={restaurantSlug}  />
         <Description restaurantSlug={restaurantSlug} />
         <Images restaurantSlug={restaurantSlug} />
-        <Reviews  />
+        <Reviews restaurantSlug={restaurantSlug}  />
       </div>
       <div className="w-[27%] relative text-reg">
         <ReservationCard />
