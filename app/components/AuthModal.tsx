@@ -1,8 +1,11 @@
 "use client";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import AuthModelInputs from "./AuthModelInputs";
+import useAuth from "@/hooks/useAuth";
+import { AuthenticationContext } from "../context/AuthContext";
+import { Alert, CircularProgress } from "@mui/material";
 
 const style = {
   position: "absolute" as "absolute",
@@ -27,10 +30,52 @@ export default function LoginModal({ isSignIn }: { isSignIn: boolean }) {
     city: "",
     password: "",
   });
+  const [disabled, setDisabled] = useState(true);
 
+  const { signIn, signUp } = useAuth();
+  const {  error, loading } = useContext(AuthenticationContext);
+
+  useEffect(() => {
+    if (isSignIn) {
+      if (inputs.email && inputs.password) {
+        setDisabled(false);
+      } else {
+        setDisabled(true);
+      }
+    } else {
+      if (
+        inputs.city &&
+        inputs.email &&
+        inputs.firstName &&
+        inputs.lastName &&
+        inputs.password &&
+        inputs.phone
+      ) {
+        setDisabled(false);
+      } else {
+        setDisabled(true);
+      }
+    }
+  }, [inputs]);
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInputs({ ...inputs, [e.target.name]: e.target.value });
   };
+
+  const handleClick = () => {
+    if (isSignIn) {
+      signIn({ email: inputs.email, password: inputs.password },handleClose);
+    } else {
+      signUp({
+        email: inputs.email,
+        password: inputs.password,
+        city: inputs.city,
+        phone: inputs.phone,
+        firstName: inputs.firstName,
+        lastName: inputs.lastName,
+      },handleClose);
+    }
+  };
+
   return (
     <div>
       <button
@@ -50,24 +95,39 @@ export default function LoginModal({ isSignIn }: { isSignIn: boolean }) {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <div className="p-2 h-[600px]">
-            <div className="uppercase font-bold text-center pb-2 border-b mb-2">
-              <p className="text-sm">
-                {isSignIn ? "Sign In" : "Create Account"}
-              </p>
+          {loading ? (
+            <div className="h-[600px] flex justify-center items-center">
+              <CircularProgress />
             </div>
-            <div className=" m-auto">
-              <h2 className="text-2xl text-center font-light">
-                {isSignIn
-                  ? "Log Into Your Account"
-                  : "Create Your Open Table Account"}
-              </h2>
-              <AuthModelInputs isSignIn={isSignIn} inputs={inputs} handleChange={handleChange} />
-              <button className=" uppercase bg-red-600 w-full text-white p-3 rounded text-sm mb-5 disabled:bg-gray-400">
-                {isSignIn ? "Sign In" : "Create Account"}
-              </button>
+          ) : (
+            <div className="p-2 h-[600px]">
+            { error && <Alert severity="error" className="mb-4">{error}</Alert>}
+              <div className="uppercase font-bold text-center pb-2 border-b mb-2">
+                <p className="text-sm">
+                  {isSignIn ? "Sign In" : "Create Account"}
+                </p>
+              </div>
+              <div className=" m-auto">
+                <h2 className="text-2xl text-center font-light">
+                  {isSignIn
+                    ? "Log Into Your Account"
+                    : "Create Your Open Table Account"}
+                </h2>
+                <AuthModelInputs
+                  isSignIn={isSignIn}
+                  inputs={inputs}
+                  handleChange={handleChange}
+                />
+                <button
+                  disabled={disabled}
+                  onClick={handleClick}
+                  className=" uppercase bg-red-600 w-full text-white p-3 rounded text-sm mb-5 disabled:bg-gray-400"
+                >
+                  {isSignIn ? "Sign In" : "Create Account"}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </Box>
       </Modal>
     </div>

@@ -3,6 +3,7 @@ import validator from "validator";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import * as jose from "jose";
+import { setCookie } from "cookies-next";
 const prisma = new PrismaClient();
 export default async function handler(
   req: NextApiRequest,
@@ -10,6 +11,8 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const { firstName, lastName, email, password, phone, city } = req.body;
+    console.log( req.body);
+    
     const errors: string[] = [];
     const validationSchema = [
       {
@@ -41,7 +44,9 @@ export default async function handler(
         errorMessage: "city is invalid",
       },
       {
-        valid: validator.isStrongPassword(password),
+        valid: validator.isLength(password,{
+          min:1
+        }),
         errorMessage: "password is not strong",
       },
     ];
@@ -84,9 +89,19 @@ export default async function handler(
       .setProtectedHeader({ alg })
       .setExpirationTime("24h")
       .sign(secret);
+
+       setCookie("jwt", token, { req, res, maxAge: 60 * 6 * 24 });
+
     res.status(200).json({
-      token: token,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      password: user.password,
+      phone: user.phone,
+      id: user.id,
+      city: user.city,
+      email: user.email,
     });
+
   }
   return res.status(404).json("unknown endpoint");
 }
