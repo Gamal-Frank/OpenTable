@@ -8,13 +8,15 @@ import ReservationCard from "./components/ReservationCard";
 import { Metadata } from "next";
 import { PrismaClient, Review } from "@prisma/client";
 import { notFound } from "next/navigation";
- export interface restaurantSlug {
+export interface restaurantSlug {
   id: number;
   name: string;
   description: string;
   images: string[];
   slug: string;
-  reviews:Review[]
+  reviews: Review[];
+  open_time: string;
+  close_time: string;
 }
 const prisma = new PrismaClient();
 const fetchRestaurantSlug = async (slug: string): Promise<restaurantSlug> => {
@@ -28,11 +30,13 @@ const fetchRestaurantSlug = async (slug: string): Promise<restaurantSlug> => {
       description: true,
       images: true,
       slug: true,
-      reviews:true
+      reviews: true,
+      open_time: true,
+      close_time: true,
     },
   });
   if (!restaurantSlug) {
-    notFound()
+    notFound();
   }
   return restaurantSlug;
 };
@@ -49,13 +53,17 @@ const RestaurantDetails = async ({ params }: { params: { slug: string } }) => {
       <div className="bg-white w-[70%] rounded p-3 shadow">
         <RestaurantNavBar slug={restaurantSlug.slug} />
         <Title restaurantSlug={restaurantSlug} />
-        <Rating restaurantSlug={restaurantSlug}  />
+        <Rating restaurantSlug={restaurantSlug} />
         <Description restaurantSlug={restaurantSlug} />
         <Images restaurantSlug={restaurantSlug} />
-        <Reviews restaurantSlug={restaurantSlug}  />
+        <Reviews restaurantSlug={restaurantSlug} />
       </div>
       <div className="w-[27%] relative text-reg">
-        <ReservationCard />
+        <ReservationCard
+          slug={restaurantSlug.slug}
+          openTime={restaurantSlug.open_time}
+          closeTime={restaurantSlug.close_time}
+        />
       </div>
     </>
   );
