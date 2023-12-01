@@ -55,11 +55,6 @@ const ReservationCard = ({
 
     return timesInWindow;
   };
-  console.log(partySizeState);
-  console.log(day);
-  console.log(time);
-
-  console.log(data);
 
   return (
     <div className=" w-[300px] bg-white rounded p-3 shadow">
@@ -130,7 +125,7 @@ const ReservationCard = ({
             {data.map((t, index) => {
               return t.available ? (
                 <Link
-                  href={`/reserve/${slug}?day=${day}T${t.time}&partySize=${partySize}`}
+                  href={`/reserve/${slug}?date=${day}T${t.time}&partySize=${partySizeState}`}
                   className="bg-red-600 ml-3 cursor-pointer p-2 w-24 text-center text-white mb-3 rounded "
                   key={index}
                 >
