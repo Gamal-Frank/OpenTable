@@ -35,6 +35,7 @@ export default function useAvaiablities() {
       setData(res.data);
     } catch (error: any) {
       setLoading(false);
+      
       setError(error.response.data.errorMessage);
     }
   };
